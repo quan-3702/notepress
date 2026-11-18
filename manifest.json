@@ -1,0 +1,17 @@
+{
+  "name": "NotePress - Audio to Sheet Music & MIDI",
+  "short_name": "NotePress",
+  "description": "Turn recordings of piano, guitar, singing and other instruments into sheet music and MIDI with AI on your own computer. Works offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#15803d",
+  "theme_color": "#15803d",
+  "categories": ["music", "education", "productivity"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "file_handlers": [{ "action": "./", "accept": { "audio/*": [".mp3", ".m4a", ".wav", ".ogg", ".flac"], "video/*": [".mp4", ".mov", ".webm"] } }]
+}

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NotePress - Audio to Sheet Music &amp; MIDI</title>
+  <meta name="description" content="Turn recordings of piano, guitar, singing and other instruments into sheet music and MIDI with AI on your own computer. Piano roll, tempo and key, MusicXML for MuseScore. Works offline.">
+  <meta name="theme-color" content="#15803d">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img src="icon-192.png" alt="" width="30" height="30"><span>NotePress</span></div>
+    <div class="top-btns">
+      <button id="addBtn" class="primary">＋ Add music</button>
+      <button id="recBtn" class="tb">🎙 Record</button>
+      <button id="moreBtn" class="tb" aria-label="More">☰</button>
+      <button id="proBtn" class="pro-btn">★ Get Pro</button>
+    </div>
+    <div id="menu" class="menu" hidden>
+      <button id="storageBtn">💽 Storage used on this computer</button>
+      <hr>
+      <button id="trialBtn">🎁 Try Pro free for 7 days</button>
+      <button id="trialEndBtn" hidden>End the Pro trial</button>
+      <a href="help.html" target="_blank" rel="noopener">❓ How to use NotePress</a>
+      <a href="mailto:thequan03072002@gmail.com?subject=NotePress%20feedback">✉ Feedback &amp; support</a>
+      <button id="aboutBtn">ℹ About NotePress</button>
+    </div>
+    <input id="fileIn" type="file" accept="audio/*,video/mp4,video/webm,video/quicktime,.mp3,.m4a,.wav,.ogg,.flac,.mp4,.mov,.webm" multiple hidden>
+  </header>
+
+  <main class="layout">
+    <aside class="left">
+      <div class="lib-head"><h3>🎼 Songs</h3><span id="libCount" class="muted small"></span></div>
+      <div id="libList" class="lib"></div>
+      <p class="fb-note">💬 Something not working the way you want? Tell me – <a href="mailto:thequan03072002@gmail.com?subject=NotePress%20feedback">thequan03072002@gmail.com</a>. I read every message and improve the app.</p>
+    </aside>
+
+    <section class="stage">
+      <div id="empty" class="empty">
+        <div class="drop" id="drop">
+          <div class="big">🎹</div>
+          <h1>Turn music into notes</h1>
+          <p>Drop a recording of <b>piano, guitar, singing</b> or another instrument here. The AI writes down every note – as <b>sheet music</b>, a <b>piano roll</b> and a <b>MIDI</b> file – on this computer. <strong>Nothing is uploaded.</strong></p>
+          <div class="row-btns center"><button id="addBtn2" class="primary big-btn">＋ Add music</button><button id="recBtn2" class="ghost big-btn">🎙 Record</button></div>
+          <p class="muted small">MP3, WAV, M4A, FLAC, OGG and videos · works best with one instrument · tip: separate the piano or the voice first with StemPress</p>
+        </div>
+      </div>
+
+      <div id="view" hidden>
+        <div class="vhead">
+          <input id="title" class="title-in" type="text" maxlength="120" aria-label="Song name">
+          <span id="info" class="muted small"></span>
+        </div>
+        <div class="panel">
+          <label class="field inline">Instrument <select id="instr"></select></label>
+          <label class="check"><input id="melody" type="checkbox"> One note at a time (melody)</label>
+          <label class="field inline">Notes found <input id="sens" type="range" min="0.2" max="0.8" step="0.05"><span class="muted small">more</span></label>
+          <label class="field inline">Shortest note <select id="minLen"><option value="0.04">very short</option><option value="0.08">short</option><option value="0.15">normal</option><option value="0.25">long</option></select></label>
+          <span class="spacer"></span>
+          <button id="goBtn" class="primary">🎵 Write down the notes</button>
+        </div>
+        <div id="prog" class="progress" hidden><div class="pbar"><i id="pfill"></i></div><span id="ptext" class="muted small"></span></div>
+        <div id="errBox" class="err" hidden></div>
+        <div id="work" hidden>
+          <div class="transport">
+            <button id="playBtn" class="primary play" aria-label="Play">▶</button>
+            <span id="time" class="time">0:00 / 0:00</span>
+            <label class="ctl">🎧 Original <input id="mix" type="range" min="0" max="1" step="0.05" value="0.5"> Notes</label>
+            <span class="spacer"></span>
+            <div class="seg"><button id="tRoll" class="on">🎹 Piano roll</button><button id="tSheet">🎼 Sheet music</button></div>
+          </div>
+          <div id="rollWrap" class="roll-wrap"><canvas id="roll"></canvas></div>
+          <div id="rollBar" class="bar small"><span class="hint">Click a note to choose it · <b>Delete</b> removes it · <b>↑ ↓</b> moves it a semitone · click the empty roll to jump there</span><span class="spacer"></span><label class="ctl">Zoom <input id="zoom" type="range" min="20" max="400" step="10" value="80"></label></div>
+          <div id="sheetWrap" hidden>
+            <div class="panel">
+              <label class="field inline">Tempo <input id="bpm" type="number" min="40" max="240" step="1"> BPM</label>
+              <label class="field inline">Time <select id="tsig"><option value="4/4">4/4</option><option value="3/4">3/4</option><option value="2/4">2/4</option><option value="6/8">6/8</option></select></label>
+              <label class="field inline">Key <select id="keySel"></select></label>
+              <label class="field inline">Staves <select id="staves"><option value="2">Piano (2)</option><option value="1">One</option></select></label>
+              <span class="spacer"></span>
+              <button id="printBtn" class="ghost">🖨 Print / PDF <span class="pro-tag">PRO</span></button>
+            </div>
+            <div id="sheetBox" class="sheet-box"><div id="sheet"></div><div id="wm" class="wm" hidden></div></div>
+          </div>
+          <div class="bar">
+            <span id="facts" class="muted small"></span>
+            <span class="spacer"></span>
+            <button id="midiBtn" class="primary">⬇ MIDI</button>
+            <button id="xmlBtn" class="ghost">⬇ MusicXML (MuseScore, Sibelius…) <span class="pro-tag">PRO</span></button>
+            <button id="delBtn" class="ghost danger" title="Delete this song">🗑</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="recDialog" class="dlg">
+    <h2>Record</h2>
+    <p class="muted">Play or sing into the microphone. When you stop, the notes are written down.</p>
+    <div id="recLive" class="rec-live" hidden><span class="rec-dot"></span> <span id="recTime">0:00</span></div>
+    <div class="row-btns"><button id="recGo" class="primary">🎙 Start recording</button><button id="recStop" class="primary" hidden>⏹ Stop</button><button id="recClose" class="ghost">Close</button></div>
+  </dialog>
+
+  <dialog id="proDialog" class="dlg">
+    <h2>NotePress Pro</h2>
+    <p class="muted">One-time purchase. Yours forever on this Microsoft account. No subscription, ever.</p>
+    <ul class="pro-list">
+      <li><strong>Whole songs</strong> up to 15 minutes <span class="muted">(free: the first minute)</span></li>
+      <li><strong>Sheet music</strong> without the preview mark – <strong>print</strong> it or save it as <strong>PDF</strong></li>
+      <li><strong>MusicXML</strong> for MuseScore, Sibelius, Finale, Dorico and Noteflight</li>
+    </ul>
+    <p class="fb-note">💬 Something not working the way you want? Tell me – <a href="mailto:thequan03072002@gmail.com?subject=NotePress%20feedback">thequan03072002@gmail.com</a>. I read every message and improve the app.</p>
+    <p id="proMsg" class="pro-msg" hidden></p>
+    <div class="row-btns">
+      <button id="buyBtn" class="primary" autofocus>Unlock Pro</button>
+      <button id="restoreBtn" class="ghost">Restore purchase</button>
+      <button id="closePro" class="ghost">Not now</button>
+    </div>
+  </dialog>
+
+  <dialog id="aboutDialog" class="dlg">
+    <h2>NotePress</h2>
+    <p>Version 1.0 · Developed by <b>NTQ37</b>.</p>
+    <p class="muted small">NotePress™ © 2026 NTQ37. All rights reserved. Note recognition: Basic Pitch by Spotify (Apache-2.0) with TensorFlow.js (Apache-2.0). Sheet music: OpenSheetMusicDisplay (BSD-3-Clause) with VexFlow (MIT).</p>
+    <div class="row-btns"><button id="aboutPro" class="primary">★ Activate Pro</button><button id="aboutClose" class="ghost">Close</button></div>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+  <div id="restartBar" class="restart" hidden>A new version of NotePress is ready. <button id="restartBtn" class="primary">Restart now</button></div>
+  <div id="printArea" class="print-area"></div>
+  <script src="note-core.js"></script>
+  <script src="opensheetmusicdisplay.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
